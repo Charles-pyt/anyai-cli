@@ -1,6 +1,6 @@
 {
   "name": "anyai-cli",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Universal AI CLI - interact with multiple AI providers using a single interface",
   "main": "bin/anyai.js",
   "bin": {
@@ -24,7 +24,11 @@
   ],
   "author": "Charles",
   "license": "MIT",
-  "type": "commonjs",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Charles-pyt/anyai-cli.git"
+  },
   "dependencies": {
     "axios": "^1.7.0",
     "boxen": "^5.1.2",
