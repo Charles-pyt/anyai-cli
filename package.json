@@ -1,0 +1,42 @@
+{
+  "name": "anyai-cli",
+  "version": "0.1.0",
+  "description": "Universal AI CLI - interact with multiple AI providers using a single interface",
+  "main": "bin/anyai.js",
+  "bin": {
+    "anyai": "bin/anyai.js"
+  },
+  "scripts": {
+    "dev": "node bin/anyai.js",
+    "start": "node bin/anyai.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ai",
+    "cli",
+    "openai",
+    "anthropic",
+    "mistral",
+    "gemini",
+    "universal",
+    "command-line"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.16.0",
+    "boxen": "^8.0.1",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.3",
+    "dotenv": "^17.4.2",
+    "figlet": "^1.11.0",
+    "inquirer": "^13.4.2",
+    "keytar": "^7.9.0",
+    "ora": "^9.4.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "preferGlobal": true
+}
