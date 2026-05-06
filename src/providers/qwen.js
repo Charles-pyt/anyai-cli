@@ -45,6 +45,10 @@ class QwenProvider extends Provider {
   }
 
   async generate(prompt, options = {}) {
+    return this.chat([{ role: 'user', content: prompt }], options);
+  }
+
+  async chat(messages, options = {}) {
     if (!this.apiKey) {
       throw new Error('Qwen API key not set');
     }
@@ -57,11 +61,11 @@ class QwenProvider extends Provider {
         {
           model,
           input: {
-            messages: [{ role: 'user', content: prompt }],
+            messages,
           },
           parameters: {
             temperature: options.temperature || 0.7,
-            max_tokens: options.maxTokens || 1000,
+            max_tokens: options.maxTokens || 2048,
           },
         },
         {

@@ -6,14 +6,14 @@ class AnthropicProvider extends Provider {
     super('anthropic');
     this.baseUrl = 'https://api.anthropic.com/v1';
     this.models = [
-      'claude-3-5-sonnet-20241022',
-      'claude-3-5-haiku-20241022',
-      'claude-3-opus-20250219',
+      'claude-sonnet-4-6',
+      'claude-haiku-4-5-20251001',
+      'claude-opus-4-7',
     ];
   }
 
   getDefaultModel() {
-    return 'claude-3-5-sonnet-20241022';
+    return 'claude-sonnet-4-6';
   }
 
   getModels() {
@@ -47,6 +47,10 @@ class AnthropicProvider extends Provider {
   }
 
   async generate(prompt, options = {}) {
+    return this.chat([{ role: 'user', content: prompt }], options);
+  }
+
+  async chat(messages, options = {}) {
     if (!this.apiKey) {
       throw new Error('Anthropic API key not set');
     }
@@ -58,8 +62,8 @@ class AnthropicProvider extends Provider {
         `${this.baseUrl}/messages`,
         {
           model,
-          max_tokens: options.maxTokens || 1024,
-          messages: [{ role: 'user', content: prompt }],
+          max_tokens: options.maxTokens || 2048,
+          messages,
         },
         {
           headers: {

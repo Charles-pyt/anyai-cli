@@ -8,7 +8,7 @@ const colors = require('../ui/colors');
 
 async function chatCommand() {
   logger.log('');
-  logger.log(colors.primary('💬 Interactive Chat Mode'));
+  logger.log(colors.primary('Interactive Chat Mode'));
   logger.separator();
 
   const config = configManager.read();
@@ -64,7 +64,7 @@ async function chatCommand() {
       try {
         spinner.start('Thinking...');
 
-        const response = await provider.generate(prompt, {
+        const response = await provider.chat(messages, {
           model: config.model,
         });
 

@@ -1,7 +1,7 @@
 const configManager = require('../config/manager');
 const logger = require('../ui/logger');
 const colors = require('../ui/colors');
-const boxen = require('boxen').default;
+const boxen = require('boxen');
 
 async function configCommand() {
   logger.log('');

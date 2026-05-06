@@ -28,7 +28,14 @@ async function modelCommand() {
       },
     ]);
 
-    configManager.set('model', answers.model);
+    const providerModels = config.providerModels || {};
+    providerModels[config.provider] = answers.model;
+
+    configManager.update({
+      model: answers.model,
+      providerModels: providerModels
+    });
+
     logger.success(`Model changed to: ${answers.model}`);
   } catch (error) {
     logger.error(error.message);

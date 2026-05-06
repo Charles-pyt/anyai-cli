@@ -2,19 +2,19 @@ const colors = require('./colors');
 
 class Logger {
   success(message) {
-    console.log(colors.success(`✓ ${message}`));
+    console.log(colors.success(`[✓] ${message}`));
   }
 
   error(message) {
-    console.log(colors.error(`✗ ${message}`));
+    console.log(colors.error(`[err] ${message}`));
   }
 
   info(message) {
-    console.log(colors.primary(`ℹ ${message}`));
+    console.log(colors.primary(`[i] ${message}`));
   }
 
   warning(message) {
-    console.log(colors.warning(`⚠ ${message}`));
+    console.log(colors.warning(`[!] ${message}`));
   }
 
   log(message) {

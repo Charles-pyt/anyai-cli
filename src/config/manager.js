@@ -31,6 +31,7 @@ class ConfigManager {
         return {
           provider: null,
           model: null,
+          providerModels: {},
         };
       }
 
@@ -41,6 +42,7 @@ class ConfigManager {
       return {
         provider: null,
         model: null,
+        providerModels: {},
       };
     }
   }

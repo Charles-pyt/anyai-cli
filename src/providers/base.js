@@ -25,6 +25,11 @@ class Provider {
     throw new Error('generate() must be implemented by subclass');
   }
 
+  async chat(messages, options = {}) {
+    const lastMessage = messages[messages.length - 1];
+    return this.generate(lastMessage.content, options);
+  }
+
   getModels() {
     throw new Error('getModels() must be implemented by subclass');
   }

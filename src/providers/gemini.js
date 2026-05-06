@@ -26,13 +26,14 @@ class GeminiProvider extends Provider {
     }
     try {
       await axios.post(
-        `${this.baseUrl}/models/${this.getDefaultModel()}:generateContent?key=${this.apiKey}`,
+        `${this.baseUrl}/models/${this.getDefaultModel()}:generateContent`,
         {
           contents: [{ parts: [{ text: 'test' }] }],
         },
         {
           headers: {
             'Content-Type': 'application/json',
+            'x-goog-api-key': this.apiKey,
           },
         }
       );
@@ -43,33 +44,35 @@ class GeminiProvider extends Provider {
   }
 
   async generate(prompt, options = {}) {
+    return this.chat([{ role: 'user', content: prompt }], options);
+  }
+
+  async chat(messages, options = {}) {
     if (!this.apiKey) {
       throw new Error('Gemini API key not set');
     }
 
     const model = options.model || this.model || this.getDefaultModel();
 
+    const contents = messages.map((msg) => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }],
+    }));
+
     try {
       const response = await axios.post(
-        `${this.baseUrl}/models/${model}:generateContent?key=${this.apiKey}`,
+        `${this.baseUrl}/models/${model}:generateContent`,
         {
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
+          contents,
           generationConfig: {
             temperature: options.temperature || 0.7,
-            maxOutputTokens: options.maxTokens || 1000,
+            maxOutputTokens: options.maxTokens || 2048,
           },
         },
         {
           headers: {
             'Content-Type': 'application/json',
+            'x-goog-api-key': this.apiKey,
           },
         }
       );

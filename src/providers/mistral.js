@@ -37,6 +37,10 @@ class MistralProvider extends Provider {
   }
 
   async generate(prompt, options = {}) {
+    return this.chat([{ role: 'user', content: prompt }], options);
+  }
+
+  async chat(messages, options = {}) {
     if (!this.apiKey) {
       throw new Error('Mistral API key not set');
     }
@@ -48,9 +52,9 @@ class MistralProvider extends Provider {
         `${this.baseUrl}/chat/completions`,
         {
           model,
-          messages: [{ role: 'user', content: prompt }],
+          messages,
           temperature: options.temperature || 0.7,
-          max_tokens: options.maxTokens || 1000,
+          max_tokens: options.maxTokens || 2048,
         },
         {
           headers: {

@@ -155,13 +155,14 @@ Display your current configuration.
 ```bash
 $ anyai config
 
-┌─────────────────────────────────────────────────────────────┐
-│  Current Configuration:                                     │
-│                                                             │
-│  Provider: openai                                           │
-│  Model: gpt-4o                                              │
-│  Config File: /home/user/.anyai/config.json                │
-└─────────────────────────────────────────────────────────────┘
+      ┌─────────────────────────────────────────────────────────────┐
+      │  Current Configuration:                                     │
+      │                                                             │
+      │  Provider: openai                                           │
+      │  Model: gpt-4o                                              │
+      │  Provider Models: {"openai":"gpt-4o","gemini":"gemini-1.5-pro","mistral":"mistral-large-latest"}
+      │  Config File: /home/user/.anyai/config.json                │
+      └─────────────────────────────────────────────────────────────┘
 ```
 
 ### `anyai model`
@@ -232,7 +233,12 @@ Configuration is stored in `~/.anyai/config.json`:
 ```json
 {
   "provider": "openai",
-  "model": "gpt-4o"
+  "model": "gpt-4o",
+  "providerModels": {
+    "openai": "gpt-4o",
+    "gemini": "gemini-1.5-pro",
+    "mistral": "mistral-large-latest"
+  }
 }
 ```
 
