@@ -37,6 +37,9 @@ temp/
 dist/
 build/
 
+# Worktrees
+.worktrees/
+
 # Skills (ignore generated skill cache, but track superpowers docs)
 docs/*
 !docs/superpowers/
