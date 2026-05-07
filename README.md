@@ -161,7 +161,7 @@ $ anyai config
       │  Provider: openai                                           │
       │  Model: gpt-4o                                              │
       │  Provider Models: {"openai":"gpt-4o","gemini":"gemini-1.5-pro","mistral":"mistral-large-latest"}
-      │  Config File: /home/user/.anyai/config.json                │
+      │  Config File: /home/user/.anyai/config.json                 │
       └─────────────────────────────────────────────────────────────┘
 ```
 

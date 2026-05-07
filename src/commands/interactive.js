@@ -7,6 +7,7 @@ const logger = require('../ui/logger');
 const colors = require('../ui/colors');
 const { renderBanner } = require('../ui/banner');
 const { showCommandPalette, COMMANDS } = require('../ui/commandPalette');
+const { renderCommandBlock, renderError } = require('../ui/renderers');
 const { estimateTokens, estimateCost, getLifetimeStats, updateLifetimeStats } = require('../utils/stats');
 
 async function interactiveCommand() {
@@ -87,12 +88,8 @@ function startInputLoop(provider, config, modelName, messages, prompt, promptLen
     }
 
     if (cmd === '/help') {
-      logger.log('');
-      logger.log(colors.primary('Commands:'));
-      COMMANDS.forEach((c) => {
-        logger.log(`  ${colors.accent(c.name.padEnd(12))} ${c.desc}`);
-      });
-      logger.log('');
+      const lines = COMMANDS.map(c => `${colors.accent(c.name.padEnd(12))} ${c.desc}`);
+      renderCommandBlock('/help', lines);
       writePrompt();
       return;
     }
@@ -144,10 +141,11 @@ function startInputLoop(provider, config, modelName, messages, prompt, promptLen
     }
 
     if (cmd === '/config') {
-      logger.info(`Provider: ${config.provider}`);
-      logger.info(`Model: ${modelName}`);
-      logger.info(`Config: ${configManager.getConfigPath()}`);
-      logger.log('');
+      renderCommandBlock('/config', [
+        `Provider: ${config.provider}`,
+        `Model: ${modelName}`,
+        `Config: ${configManager.getConfigPath()}`
+      ]);
       writePrompt();
       return;
     }
@@ -155,31 +153,33 @@ function startInputLoop(provider, config, modelName, messages, prompt, promptLen
     if (cmd === '/tokens') {
       const currentContext = messages.map(m => m.content).join('\n');
       const currentContextTokens = estimateTokens(currentContext);
-      logger.info(`Session Tokens: ${sessionTokens}`);
-      logger.info(`Current Context: ~${currentContextTokens} tokens`);
-      logger.log('');
+      renderCommandBlock('/tokens', [
+        `Session Tokens: ${sessionTokens}`,
+        `Current Context: ~${currentContextTokens} tokens`
+      ]);
       writePrompt();
       return;
     }
 
     if (cmd === '/cost') {
-      logger.info(`Session Cost: ~$${sessionCost.toFixed(4)}`);
-      logger.log('');
+      renderCommandBlock('/cost', `~$${sessionCost.toFixed(4)}`);
       writePrompt();
       return;
     }
 
     if (cmd === '/stats') {
       const stats = getLifetimeStats();
-      logger.info(`Lifetime Tokens: ${stats.totalTokens}`);
-      logger.info(`Lifetime Cost: ~$${stats.totalCost.toFixed(4)}`);
+      const lines = [
+        `Lifetime Tokens: ${stats.totalTokens}`,
+        `Lifetime Cost: ~$${stats.totalCost.toFixed(4)}`
+      ];
       if (stats.modelsUsed) {
-        logger.info(`Models used:`);
+        lines.push('Models used:');
         for (const [model, count] of Object.entries(stats.modelsUsed)) {
-          logger.info(`  - ${model}: ${count} tokens`);
+          lines.push(`  ${model}: ${count} tokens`);
         }
       }
-      logger.log('');
+      renderCommandBlock('/stats', lines);
       writePrompt();
       return;
     }
@@ -193,27 +193,23 @@ function startInputLoop(provider, config, modelName, messages, prompt, promptLen
         }
         const ms = Date.now() - start;
         spinner.stop();
-        logger.success(`Response time: ${ms}ms`);
+        renderCommandBlock('/ping', `${ms}ms`);
       } catch (err) {
         spinner.stop();
-        logger.error(`Ping failed: ${err.message}`);
+        renderError('/ping', `Ping failed: ${err.message}`);
       }
-      logger.log('');
       writePrompt();
       return;
     }
 
     if (cmd === '/theme') {
       const newTheme = colors.cycleTheme();
-      logger.success(`Theme changed to: ${newTheme}`);
-      logger.log('');
+      renderCommandBlock('/theme', `Theme changed to: ${newTheme}`);
       writePrompt();
       return;
     }
 
-    stdout.write('\n');
-    logger.error(`Unknown command: ${cmd}`);
-    logger.log('');
+    renderError(cmd, `Unknown command: ${cmd}`);
     writePrompt();
   }
 

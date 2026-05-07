@@ -3,7 +3,8 @@ const chalk = require('chalk');
 const colors = require('./colors');
 const pkg = require('../../package.json');
 
-const border = chalk.yellow;
+// A dimmer border makes the bright text inside pop more
+const border = chalk.dim.cyan;
 
 const TIPS = [
   'Type /help to see all available commands.',
@@ -17,65 +18,94 @@ function randomTip() {
   return TIPS[Math.floor(Math.random() * TIPS.length)];
 }
 
+// More robust ANSI stripper to ensure perfect box alignment
 function stripAnsi(str) {
-  return str.replace(/\x1B\[[0-9;]*m/g, '');
+  return str.replace(
+    /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+    ''
+  );
 }
 
-function drawBoxWithTip(lines, tip) {
-  const allStripped = [...lines.map((l) => stripAnsi(l)), stripAnsi(tip)];
-  const width = Math.max(...allStripped.map((l) => l.length)) + 4;
+// Helper to center text within the box
+function centerText(text, width) {
+  const stripped = stripAnsi(text);
+  const padding = width - stripped.length;
+  const padLeft = Math.floor(padding / 2);
+  const padRight = padding - padLeft;
+  return ' '.repeat(padLeft) + text + ' '.repeat(padRight);
+}
 
-  const top = border('╭' + '─'.repeat(width - 2) + '╮');
-  const bottom = border('╰' + '─'.repeat(width - 2) + '╯');
-  const divider = border('├' + '─'.repeat(width - 2) + '┤');  // used below
-  const empty = border('│') + ' '.repeat(width - 2) + border('│');
+function drawPremiumBox(lines, tip) {
+  const allStripped = [...lines.map(stripAnsi), stripAnsi(tip)];
+  // Add wider padding (8 spaces total) for a cleaner, breathable look
+  const contentWidth = Math.max(...allStripped.map((l) => l.length));
+  const boxWidth = contentWidth + 8;
+
+  const top = border('╭' + '─'.repeat(boxWidth - 2) + '╮');
+  const bottom = border('╰' + '─'.repeat(boxWidth - 2) + '╯');
+  const divider = border('├' + '─'.repeat(boxWidth - 2) + '┤');
+  const empty = border('│') + ' '.repeat(boxWidth - 2) + border('│');
 
   const bodyRows = lines.map((l) => {
-    const pad = width - 2 - stripAnsi(l).length;
-    return border('│') + '  ' + l + ' '.repeat(pad - 2) + border('│');
+    return border('│') + centerText(l, boxWidth - 2) + border('│');
   });
 
-  const tipPad = width - 2 - stripAnsi(tip).length;
-  const tipRow = border('│') + '  ' + tip + ' '.repeat(tipPad - 2) + border('│');
+  const tipRow = border('│') + centerText(tip, boxWidth - 2) + border('│');
 
-  return [top, empty, ...bodyRows, empty, divider, empty, tipRow, empty, bottom].join('\n');
+  return [
+    top,
+    empty,
+    ...bodyRows,
+    empty,
+    divider,
+    empty,
+    tipRow,
+    empty,
+    bottom
+  ].join('\n');
 }
 
 function renderBanner() {
-  const logo = figlet.textSync('anyai', {
-    font: 'Standard',
-    horizontalLayout: 'default',
+  // 'Slant' looks incredibly sleek for modern CLIs
+  const logo = figlet.textSync('AnyAI', {
+    font: 'Slant',
+    horizontalLayout: 'fitted',
   });
 
-  const logoLines = logo.split('\n').filter((l) => l.trim()).map((l) => colors.primary(l));
-  const desc = colors.accent('Universal AI CLI') + chalk.white(' — Interact with any AI provider');
-  const version = colors.secondary('v' + pkg.version);
+  const logoLines = logo
+    .split('\n')
+    .filter((l) => l.trimRight()) // Removes trailing blank lines
+    .map((l) => chalk.bold(colors.primary(l)));
 
+  // Using a standard pipe character instead of bullets/icons
+  const desc =
+    chalk.bold(colors.accent('Universal AI CLI')) +
+    chalk.dim(' | ') +
+    chalk.white('Interact with any AI provider');
+
+  const version = colors.secondary('v' + pkg.version);
   const tip = chalk.yellow('Tip: ') + chalk.white(randomTip());
 
   const lines = [...logoLines, '', desc, version];
 
-  console.log('');
-  console.log(drawBoxWithTip(lines, tip));
-  console.log('');
+  console.log('\n' + drawPremiumBox(lines, tip) + '\n');
 }
 
 function renderQuickStart() {
-  const tips = [
-    colors.primary('Get started:'),
+  const title = chalk.bold(colors.primary('Quick Start Guide:'));
+
+  const steps = [
+    `  ${chalk.cyan('1.')} ${chalk.bold('Configure your AI provider:')}`,
+    `     ${chalk.dim('$')} ${colors.accent('anyai configure')}`,
     '',
-    colors.secondary('  1.') + ' Configure your AI provider:',
-    colors.muted('     anyai configure'),
+    `  ${chalk.cyan('2.')} ${chalk.bold('Start an interactive chat:')}`,
+    `     ${chalk.dim('$')} ${colors.accent('anyai')}`,
     '',
-    colors.secondary('  2.') + ' Start chatting:',
-    colors.muted('     anyai'),
-    '',
-    colors.secondary('  3.') + ' One-shot question:',
-    colors.muted('     anyai ask "What is Node.js?"'),
+    `  ${chalk.cyan('3.')} ${chalk.bold('Ask a one-shot question:')}`,
+    `     ${chalk.dim('$')} ${colors.accent('anyai ask "What is Node.js?"')}`,
   ].join('\n');
 
-  console.log(tips);
-  console.log('');
+  console.log(title + '\n\n' + steps + '\n');
 }
 
 module.exports = {
