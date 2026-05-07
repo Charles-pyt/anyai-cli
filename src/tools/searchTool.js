@@ -46,9 +46,19 @@ const searchFiles = {
   },
   async execute({ pattern, glob }) {
     const cwd = process.cwd();
-    const matches = await grepFallback(pattern, cwd, glob);
-    if (matches.length === 0) return { success: true, matches: [], message: 'No matches found' };
-    return { success: true, matches: matches.slice(0, 50) };
+    let re;
+    try {
+      re = new RegExp(pattern, 'i');
+    } catch (err) {
+      return { success: false, error: `Invalid regex: ${err.message}` };
+    }
+    try {
+      const matches = await grepFallback(pattern, cwd, glob);
+      if (matches.length === 0) return { success: true, matches: [], message: 'No matches found' };
+      return { success: true, matches: matches.slice(0, 50) };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   }
 };
 

@@ -30,8 +30,14 @@ function classify(command) {
 
 function askQuestion(question) {
   return new Promise(resolve => {
+    const wasRaw = process.stdin.isRaw;
+    if (wasRaw) process.stdin.setRawMode(false);
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question(question, answer => { rl.close(); resolve(answer.trim()); });
+    rl.question(question, answer => {
+      rl.close();
+      if (wasRaw) process.stdin.setRawMode(true);
+      resolve(answer.trim());
+    });
   });
 }
 

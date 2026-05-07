@@ -117,8 +117,12 @@ const editFile = {
       return { success: false, error: `Cannot read file: ${err.message}` };
     }
 
-    // Strategy 1: exact match
+    // Strategy 1: exact match (verify unique to avoid silent partial edits)
     if (content.includes(old_str)) {
+      const occurrences = content.split(old_str).length - 1;
+      if (occurrences > 1) {
+        return { success: false, error: `old_str matches ${occurrences} locations — make it more specific.` };
+      }
       await fs.writeFile(absPath, content.replace(old_str, new_str), 'utf8');
       return { success: true, method: 'exact' };
     }
