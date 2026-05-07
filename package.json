@@ -1,6 +1,6 @@
 {
   "name": "anyai-cli",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Universal AI CLI - interact with multiple AI providers using a single interface",
   "main": "bin/anyai.js",
   "bin": {

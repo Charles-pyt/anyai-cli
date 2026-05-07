@@ -57,14 +57,19 @@ class AnthropicProvider extends Provider {
 
     const model = options.model || this.model || this.getDefaultModel();
 
+    const body = {
+      model,
+      max_tokens: options.maxTokens || 4096,
+      messages,
+    };
+
+    if (options.system) body.system = options.system;
+    if (options.tools && options.tools.length > 0) body.tools = options.tools;
+
     try {
       const response = await axios.post(
         `${this.baseUrl}/messages`,
-        {
-          model,
-          max_tokens: options.maxTokens || 2048,
-          messages,
-        },
+        body,
         {
           headers: {
             'x-api-key': this.apiKey,
@@ -74,7 +79,20 @@ class AnthropicProvider extends Provider {
         }
       );
 
-      return response.data.content[0].text;
+      const data = response.data;
+
+      // Return full response object when tools are involved
+      if (options.tools && options.tools.length > 0) {
+        return {
+          stop_reason: data.stop_reason,
+          content: data.content,
+          // Convenience: extract plain text if present
+          text: data.content.find(b => b.type === 'text')?.text || null,
+        };
+      }
+
+      // Legacy path: plain chat — return text string as before
+      return data.content[0].text;
     } catch (error) {
       if (error.response?.status === 401) {
         throw new Error('Invalid Anthropic API key');

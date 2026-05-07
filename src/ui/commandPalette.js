@@ -13,6 +13,8 @@ const COMMANDS = [
   { name: '/ping', desc: 'Check API latency for current provider' },
   { name: '/theme', desc: 'Cycle UI color themes' },
   { name: '/config', desc: 'Show current configuration' },
+  { name: '/agent', desc: 'Switch to agent mode (default)' },
+  { name: '/chat', desc: 'Switch to passive chat mode' },
   { name: '/exit', desc: 'Quit anyai' },
 ];
 
