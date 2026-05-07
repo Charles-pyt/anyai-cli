@@ -36,3 +36,7 @@ temp/
 # Build
 dist/
 build/
+
+# Skills (ignore generated skill cache, but track superpowers docs)
+docs/*
+!docs/superpowers/
