@@ -4,7 +4,7 @@
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Node.js](https://img.shields.io/badge/node-%3E%3D14.0.0-blue)
-
+![Npmjs.com](https://img.shields.io/badge/npm-%3E%3D11.13.0-red)
 ## Overview
 
 `anyai-cli` is an open-source CLI tool that provides a unified interface to interact with multiple AI providers (OpenAI, Anthropic, Mistral, Google Gemini, Alibaba Qwen) using your own API keys. No vendor lock-in, no account creation needed — just your API credentials.
