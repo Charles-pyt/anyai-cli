@@ -8,6 +8,8 @@ const colors = require('../ui/colors');
 const { renderBanner } = require('../ui/banner');
 const { showCommandPalette, COMMANDS } = require('../ui/commandPalette');
 const { estimateTokens, estimateCost, getLifetimeStats, updateLifetimeStats } = require('../utils/stats');
+const { renderCommandBlock, renderError } = require('../ui/renderers');
+const agentLoop = require('../agent/index');
 
 async function interactiveCommand() {
   renderBanner();
@@ -36,7 +38,7 @@ async function interactiveCommand() {
   const modelName = config.model || provider.getDefaultModel();
   logger.log('');
   logger.info(`${colors.accent(config.provider)} / ${colors.accent(modelName)}`);
-  logger.info('Type a message or / for commands. Tab to autocomplete.');
+  logger.info('Agent mode active. Type a message or / for commands. Tab to autocomplete.');
   logger.separator();
   logger.log('');
 
@@ -55,6 +57,7 @@ function startInputLoop(provider, config, modelName, messages, prompt, promptLen
   let paletteActive = false;
   let sessionTokens = 0;
   let sessionCost = 0;
+  let agentMode = true;
 
   stdin.setRawMode(true);
   stdin.resume();
@@ -211,6 +214,20 @@ function startInputLoop(provider, config, modelName, messages, prompt, promptLen
       return;
     }
 
+    if (cmd === '/agent') {
+      agentMode = true;
+      renderCommandBlock('/agent', 'Agent mode enabled');
+      writePrompt();
+      return;
+    }
+
+    if (cmd === '/chat') {
+      agentMode = false;
+      renderCommandBlock('/chat', 'Chat mode enabled — no tools');
+      writePrompt();
+      return;
+    }
+
     stdout.write('\n');
     logger.error(`Unknown command: ${cmd}`);
     logger.log('');
@@ -218,35 +235,38 @@ function startInputLoop(provider, config, modelName, messages, prompt, promptLen
   }
 
   async function handleMessage(input) {
-    messages.push({ role: 'user', content: input });
-
     stdout.write('\n');
-    spinner.start('Thinking...');
 
-    try {
-      const response = await provider.chat(messages, { model: config.model });
-      spinner.stop();
-
-      messages.push({ role: 'assistant', content: response });
-
-      const contextText = messages.map(m => m.content).join('\n');
-      const responseTokens = estimateTokens(response);
-      const inputTokens = estimateTokens(contextText) - responseTokens;
-      const totalTokens = inputTokens + responseTokens;
-      const activeModel = config.model || provider.getDefaultModel();
-      const cost = estimateCost(totalTokens, activeModel);
-      
-      sessionTokens += totalTokens;
-      sessionCost += cost;
-      updateLifetimeStats(activeModel, totalTokens, cost);
-
-      logger.log('');
-      console.log(colors.accent('AI: ') + response);
-      logger.log('');
-    } catch (error) {
-      spinner.fail(error.message);
-      messages.pop();
-      logger.log('');
+    if (agentMode) {
+      try {
+        await agentLoop.run(input, messages, provider, config);
+      } catch (error) {
+        renderError('agent', error.message);
+      }
+    } else {
+      messages.push({ role: 'user', content: input });
+      spinner.start('Thinking...');
+      try {
+        const response = await provider.chat(messages, { model: config.model });
+        spinner.stop();
+        messages.push({ role: 'assistant', content: response });
+        const contextText = messages.map(m => typeof m.content === 'string' ? m.content : '').join('\n');
+        const responseTokens = estimateTokens(response);
+        const inputTokens = estimateTokens(contextText) - responseTokens;
+        const totalTokens = inputTokens + responseTokens;
+        const activeModel = config.model || provider.getDefaultModel();
+        const cost = estimateCost(totalTokens, activeModel);
+        sessionTokens += totalTokens;
+        sessionCost += cost;
+        updateLifetimeStats(activeModel, totalTokens, cost);
+        logger.log('');
+        console.log(colors.accent('AI: ') + response);
+        logger.log('');
+      } catch (error) {
+        spinner.fail(error.message);
+        messages.pop();
+        logger.log('');
+      }
     }
 
     writePrompt();
