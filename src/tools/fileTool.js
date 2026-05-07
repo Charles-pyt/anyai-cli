@@ -143,4 +143,27 @@ const editFile = {
   }
 };
 
-module.exports = { readFile, writeFile, listDir, editFile };
+const deleteFile = {
+  schema: {
+    name: 'delete_file',
+    description: 'Delete a file. Will prompt for confirmation before executing.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        path: { type: 'string', description: 'Path to the file to delete' }
+      },
+      required: ['path']
+    }
+  },
+  async execute({ path: filePath }) {
+    const absPath = path.resolve(process.cwd(), filePath);
+    try {
+      await fs.unlink(absPath);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }
+};
+
+module.exports = { readFile, writeFile, listDir, editFile, deleteFile };
